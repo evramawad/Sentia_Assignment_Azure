@@ -15,9 +15,6 @@
         "serverName": {
             "type": "string"
         },
-        "skuCapacity": {
-            "type": "int"
-        },
         "skuFamily": {
             "type": "string"
         },
@@ -73,6 +70,9 @@
             "type": "string"
         }
     },
+	"variables": {
+        "skuCapacity": "4"
+	}
     "resources": [
         {
             "name": "[parameters('name')]",
