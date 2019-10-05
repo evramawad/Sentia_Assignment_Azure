@@ -17,9 +17,6 @@
         "serverName": {
             "value": "evram-mysqldbserver"
         },
-        "skuCapacity": {
-            "value": 4
-        },
         "skuFamily": {
             "value": "Gen5"
         },
