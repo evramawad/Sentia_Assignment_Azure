@@ -1,0 +1,78 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "databaseName": {
+            "value": "mysqldatabase17990"
+        },
+        "administratorLogin": {
+            "value": "mysqldbuser"
+        },
+        "administratorLoginPassword": {
+            "value": null
+        },
+        "mysqLocation": {
+            "value": "Central US"
+        },
+        "serverName": {
+            "value": "evram-mysqldbserver"
+        },
+        "skuCapacity": {
+            "value": 4
+        },
+        "skuFamily": {
+            "value": "Gen5"
+        },
+        "skuName": {
+            "value": "GP_Gen5_4"
+        },
+        "skuSizeMB": {
+            "value": 102400
+        },
+        "skuTier": {
+            "value": "GeneralPurpose"
+        },
+        "storageMB": {
+            "value": 102400
+        },
+        "backupRetentionDays": {
+            "value": 7
+        },
+        "geoRedundantBackup": {
+            "value": "Disabled"
+        },
+        "version": {
+            "value": "5.7"
+        },
+        "collation": {
+            "value": "utf8_general_ci"
+        },
+        "charset": {
+            "value": "utf8"
+        },
+        "name": {
+            "value": "evram"
+        },
+        "hostingPlanName": {
+            "value": "ServicePlana8ba0d31-8463"
+        },
+        "location": {
+            "value": "Central US"
+        },
+        "sku": {
+            "value": "Standard"
+        },
+        "workerSize": {
+            "value": "0"
+        },
+        "serverFarmResourceGroup": {
+            "value": "evram"
+        },
+        "skuCode": {
+            "value": "S1"
+        },
+        "subscriptionId": {
+            "value": "228757fa-55fd-4118-b464-72c9e5eeb8d3"
+        }
+    }
+}
