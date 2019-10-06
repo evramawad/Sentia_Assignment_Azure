@@ -1,19 +1,24 @@
 {
     "parameters": {
         "DatabaseName": {
-            "type": "string"
+            "type": "string",
+			"defaultValue": "mysqldatabase45540"
         },
         "MysqlUsername": {
-            "type": "string"
+            "type": "string",
+			"defaultValue": "mysqldbuser"
         },
         "MysqlPassword": {
-            "type": "securestring"
+            "type": "securestring",
+			"defaultValue": null
         },
         "MysqlServerName": {
-            "type": "string"
+            "type": "string",
+			"defaultValue": "sentia-mysqldbserver"
         },
         "AppName": {
-            "type": "string"
+            "type": "string",
+			"defaultValue": "sentia"
         }
     },
     "resources": [
