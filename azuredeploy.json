@@ -1,0 +1,161 @@
+{
+    "parameters": {
+        "DatabaseName": {
+            "type": "string"
+        },
+        "MysqlUsername": {
+            "type": "string"
+        },
+        "MysqlPassword": {
+            "type": "securestring"
+        },
+        "MysqlServerName": {
+            "type": "string"
+        },
+        "AppName": {
+            "type": "string"
+        }
+    },
+    "resources": [
+        {
+            "name": "[parameters('AppName')]",
+            "type": "Microsoft.Web/sites",
+            "properties": {
+                "siteConfig": {
+                    "appSettings": [
+                        {
+                            "name": "PHPMYADMIN_EXTENSION_VERSION",
+                            "value": "latest"
+                        },
+                        {
+                            "name": "WEBSITE_DYNAMIC_CACHE",
+                            "value": "0"
+                        },
+                        {
+                            "name": "APPINSIGHTS_INSTRUMENTATIONKEY",
+                            "value": "[reference(concat('microsoft.insights/components/',parameters('AppName')), '2015-05-01').InstrumentationKey]"
+                        },
+                        {
+                            "name": "XDT_MicrosoftApplicationInsights_Mode",
+                            "value": "default"
+                        },
+                        {
+                            "name": "ApplicationInsightsAgent_EXTENSION_VERSION",
+                            "value": "~2"
+                        }
+                    ],
+                    "phpVersion": "7.0",
+                    "connectionStrings": [
+                        {
+                            "name": "defaultConnection",
+                            "ConnectionString": "[concat('Database=', parameters('DatabaseName'), ';Data Source=', parameters('MysqlServerName') ,'.mysql.database.azure.com;User Id=',parameters('MysqlUsername'),'@',parameters('MysqlServerName') ,';Password=',parameters('MysqlPassword'))]",
+                            "type": "MySQL"
+                        }
+                    ]
+                },
+                "name": "[parameters('AppName')]",
+                "serverFarmId": "[concat('/subscriptions/', subscription().subscriptionId,'/resourcegroups/', resourceGroup().id, '/providers/Microsoft.Web/serverfarms/', concat(parameters('AppName'), 'ServicePlan' ))]"
+            },
+            "resources": [
+                {
+                    "apiVersion": "2016-03-01",
+                    "name": "web",
+                    "type": "sourcecontrols",
+                    "dependsOn": [
+                        "[resourceId('Microsoft.Web/Sites', parameters('AppName'))]"
+                    ],
+                    "properties": {
+                        "RepoUrl": "https://github.com/azureappserviceoss/wordpress-azure",
+                        "branch": "master",
+                        "IsManualIntegration": true
+                    }
+                }
+            ],
+            "dependsOn": [
+                "[concat('Microsoft.Web/serverfarms/', concat(parameters('AppName'), 'ServicePlan' ))]",
+                "[concat('microsoft.insights/components/', parameters('AppName'))]"
+            ],
+            "apiVersion": "2016-03-01",
+            "location": "[resourceGroup().location]"
+        },
+        {
+            "apiVersion": "2016-09-01",
+            "name": "[concat(parameters('AppName'), 'ServicePlan' )]",
+            "type": "Microsoft.Web/serverfarms",
+            "location": "[resourceGroup().location]",
+            "properties": {
+                "name": "[concat(parameters('AppName'), 'ServicePlan' )]",
+                "workerSizeId": "0",
+                "numberOfWorkers": "1"
+            },
+            "sku": {
+                "Tier": "Standard",
+                "Name": "S1"
+            }
+        },
+        {
+            "apiVersion": "2015-05-01",
+            "name": "[parameters('AppName')]",
+            "type": "microsoft.insights/components",
+            "location": "[resourceGroup().location]",
+            "properties": {
+                "ApplicationId": "[parameters('AppName')]",
+                "Request_Source": "IbizaWebAppExtensionCreate"
+            }
+        },
+        {
+            "name": "[parameters('MysqlServerName')]",
+            "type": "Microsoft.DBforMySQL/servers",
+            "apiVersion": "2017-12-01-preview",
+            "location": "[resourceGroup().location]",
+            "properties": {
+                "version": "5.7",
+                "administratorLogin": "[parameters('MysqlUsername')]",
+                "administratorLoginPassword": "[parameters('MySQLPassword')]",
+                "storageProfile": {
+                    "storageMB": "102400",
+                    "backupRetentionDays": "7",
+                    "geoRedundantBackup": "Disabled"
+                },
+                "sslEnforcement": "Disabled"
+            },
+            "sku": {
+                "name": "GP_Gen5_4",
+                "tier": "GeneralPurpose",
+                "capacity": "4",
+                "size": "102400",
+                "family": "Gen5"
+            },
+            "resources": [
+                {
+                    "name": "AllowAll",
+                    "type": "firewallrules",
+                    "apiVersion": "2017-12-01-preview",
+                    "properties": {
+                        "startIpAddress": "0.0.0.0",
+                        "endIpAddress": "255.255.255.255"
+                    },
+                    "location": "[resourceGroup().location]",
+                    "dependsOn": [
+                        "[concat('Microsoft.DBforMySQL/servers/', parameters('MysqlServerName'), '/databases/' , parameters('DatabaseName'))]",
+                        "[concat('Microsoft.DBforMySQL/servers/', parameters('MysqlServerName'))]"
+                    ]
+                },
+                {
+                    "name": "[parameters('DatabaseName')]",
+                    "type": "databases",
+                    "apiVersion": "2017-12-01-preview",
+                    "properties": {
+                        "charset": "utf8",
+                        "collation": "utf8_general_ci"
+                    },
+                    "dependsOn": [
+                        "[concat('Microsoft.DBforMySQL/servers/', parameters('MysqlServerName'))]"
+                    ]
+                }
+            ]
+        }
+    ],
+    "$schema": "http://schema.management.azure.com/schemas/2014-04-01-preview/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0"
+}
