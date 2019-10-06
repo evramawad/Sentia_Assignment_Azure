@@ -1,81 +1,24 @@
 {
     "parameters": {
-        "databaseName": {
+        "DatabaseName": {
             "type": "string"
         },
-        "administratorLogin": {
+        "MysqlUsername": {
             "type": "string"
         },
-        "administratorLoginPassword": {
+        "MysqlPassword": {
             "type": "securestring"
         },
-        "mysqLocation": {
+        "MysqlServerName": {
             "type": "string"
         },
-        "serverName": {
-            "type": "string"
-        },
-        "skuFamily": {
-            "type": "string"
-        },
-        "storageMB": {
-            "type": "int"
-        },
-        "backupRetentionDays": {
-            "type": "int"
-        },
-        "geoRedundantBackup": {
-            "type": "string"
-        },
-        "skuName": {
-            "type": "string"
-        },
-        "skuSizeMB": {
-            "type": "int"
-        },
-        "skuTier": {
-            "type": "string"
-        },
-        "version": {
-            "type": "string"
-        },
-        "charset": {
-            "type": "string"
-        },
-        "collation": {
-            "type": "string"
-        },
-        "name": {
-            "type": "string"
-        },
-        "hostingPlanName": {
-            "type": "string"
-        },
-        "location": {
-            "type": "string"
-        },
-        "sku": {
-            "type": "string"
-        },
-        "skuCode": {
-            "type": "string"
-        },
-        "workerSize": {
-            "type": "string"
-        },
-        "serverFarmResourceGroup": {
-            "type": "string"
-        },
-        "subscriptionId": {
+        "AppName": {
             "type": "string"
         }
     },
-	"variables": {
-        "skuCapacity": "4"
-	}
     "resources": [
         {
-            "name": "[parameters('name')]",
+            "name": "[parameters('AppName')]",
             "type": "Microsoft.Web/sites",
             "properties": {
                 "siteConfig": {
@@ -90,7 +33,7 @@
                         },
                         {
                             "name": "APPINSIGHTS_INSTRUMENTATIONKEY",
-                            "value": "[reference('microsoft.insights/components/evram', '2015-05-01').InstrumentationKey]"
+                            "value": "[reference(concat('microsoft.insights/components/',parameters('AppName')), '2015-05-01').InstrumentationKey]"
                         },
                         {
                             "name": "XDT_MicrosoftApplicationInsights_Mode",
@@ -105,13 +48,13 @@
                     "connectionStrings": [
                         {
                             "name": "defaultConnection",
-                            "ConnectionString": "[concat('Database=', parameters('databaseName'), ';Data Source=', parameters('serverName') ,'.mysql.database.azure.com;User Id=',parameters('administratorLogin'),'@',parameters('serverName') ,';Password=',parameters('administratorLoginPassword'))]",
+                            "ConnectionString": "[concat('Database=', parameters('DatabaseName'), ';Data Source=', parameters('MysqlServerName') ,'.mysql.database.azure.com;User Id=',parameters('MysqlUsername'),'@',parameters('MysqlServerName') ,';Password=',parameters('MysqlPassword'))]",
                             "type": "MySQL"
                         }
                     ]
                 },
-                "name": "[parameters('name')]",
-                "serverFarmId": "[concat('/subscriptions/', parameters('subscriptionId'),'/resourcegroups/', parameters('serverFarmResourceGroup'), '/providers/Microsoft.Web/serverfarms/', parameters('hostingPlanName'))]"
+                "name": "[parameters('AppName')]",
+                "serverFarmId": "[concat('/subscriptions/', subscription().subscriptionId,'/resourcegroups/', resourceGroup().id, '/providers/Microsoft.Web/serverfarms/', concat(parameters('AppName'), 'ServicePlan' ))]"
             },
             "resources": [
                 {
@@ -119,7 +62,7 @@
                     "name": "web",
                     "type": "sourcecontrols",
                     "dependsOn": [
-                        "[resourceId('Microsoft.Web/Sites', parameters('name'))]"
+                        "[resourceId('Microsoft.Web/Sites', parameters('AppName'))]"
                     ],
                     "properties": {
                         "RepoUrl": "https://github.com/azureappserviceoss/wordpress-azure",
@@ -129,59 +72,59 @@
                 }
             ],
             "dependsOn": [
-                "[concat('Microsoft.Web/serverfarms/', parameters('hostingPlanName'))]",
-                "microsoft.insights/components/evram"
+                "[concat('Microsoft.Web/serverfarms/', concat(parameters('AppName'), 'ServicePlan' ))]",
+                "[concat('microsoft.insights/components/', parameters('AppName'))]"
             ],
             "apiVersion": "2016-03-01",
-            "location": "[parameters('location')]"
+            "location": "[resourceGroup().location]"
         },
         {
             "apiVersion": "2016-09-01",
-            "name": "[parameters('hostingPlanName')]",
+            "name": "[concat(parameters('AppName'), 'ServicePlan' )]",
             "type": "Microsoft.Web/serverfarms",
-            "location": "[parameters('location')]",
+            "location": "[resourceGroup().location]",
             "properties": {
-                "name": "[parameters('hostingPlanName')]",
-                "workerSizeId": "[parameters('workerSize')]",
+                "name": "[concat(parameters('AppName'), 'ServicePlan' )]",
+                "workerSizeId": "0",
                 "numberOfWorkers": "1"
             },
             "sku": {
-                "Tier": "[parameters('sku')]",
-                "Name": "[parameters('skuCode')]"
+                "Tier": "Standard",
+                "Name": "S1"
             }
         },
         {
             "apiVersion": "2015-05-01",
-            "name": "evram",
+            "name": "[parameters('AppName')]",
             "type": "microsoft.insights/components",
-            "location": "centralus",
+            "location": "[resourceGroup().location]",
             "properties": {
-                "ApplicationId": "[parameters('name')]",
+                "ApplicationId": "[parameters('AppName')]",
                 "Request_Source": "IbizaWebAppExtensionCreate"
             }
         },
         {
-            "name": "[parameters('serverName')]",
+            "name": "[parameters('MysqlServerName')]",
             "type": "Microsoft.DBforMySQL/servers",
             "apiVersion": "2017-12-01-preview",
-            "location": "[parameters('mysqLocation')]",
+            "location": "[resourceGroup().location]",
             "properties": {
-                "version": "[parameters('version')]",
-                "administratorLogin": "[parameters('administratorLogin')]",
-                "administratorLoginPassword": "[parameters('administratorLoginPassword')]",
+                "version": "5.7",
+                "administratorLogin": "[parameters('MysqlUsername')]",
+                "administratorLoginPassword": "[parameters('MySQLPassword')]",
                 "storageProfile": {
-                    "storageMB": "[parameters('skuSizeMB')]",
-                    "backupRetentionDays": "[parameters('backupRetentionDays')]",
-                    "geoRedundantBackup": "[parameters('geoRedundantBackup')]"
+                    "storageMB": "102400",
+                    "backupRetentionDays": "7",
+                    "geoRedundantBackup": "Disabled"
                 },
                 "sslEnforcement": "Disabled"
             },
             "sku": {
-                "name": "[parameters('skuName')]",
-                "tier": "[parameters('skuTier')]",
-                "capacity": "[parameters('skuCapacity')]",
-                "size": "[parameters('skuSizeMB')]",
-                "family": "[parameters('skuFamily')]"
+                "name": "GP_Gen5_4",
+                "tier": "GeneralPurpose",
+                "capacity": "4",
+                "size": "102400",
+                "family": "Gen5"
             },
             "resources": [
                 {
@@ -192,22 +135,22 @@
                         "startIpAddress": "0.0.0.0",
                         "endIpAddress": "255.255.255.255"
                     },
-                    "location": "[parameters('mysqLocation')]",
+                    "location": "[resourceGroup().location]",
                     "dependsOn": [
-                        "[concat('Microsoft.DBforMySQL/servers/', parameters('serverName'), '/databases/' , parameters('databaseName'))]",
-                        "[concat('Microsoft.DBforMySQL/servers/', parameters('serverName'))]"
+                        "[concat('Microsoft.DBforMySQL/servers/', parameters('MysqlServerName'), '/databases/' , parameters('DatabaseName'))]",
+                        "[concat('Microsoft.DBforMySQL/servers/', parameters('MysqlServerName'))]"
                     ]
                 },
                 {
-                    "name": "[parameters('databaseName')]",
+                    "name": "[parameters('DatabaseName')]",
                     "type": "databases",
                     "apiVersion": "2017-12-01-preview",
                     "properties": {
-                        "charset": "[parameters('charset')]",
-                        "collation": "[parameters('collation')]"
+                        "charset": "utf8",
+                        "collation": "utf8_general_ci"
                     },
                     "dependsOn": [
-                        "[concat('Microsoft.DBforMySQL/servers/', parameters('serverName'))]"
+                        "[concat('Microsoft.DBforMySQL/servers/', parameters('MysqlServerName'))]"
                     ]
                 }
             ]
