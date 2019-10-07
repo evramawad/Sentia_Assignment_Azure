@@ -2,7 +2,7 @@
     "parameters": {
         "DatabaseName": {
             "type": "string",
-			"defaultValue": "wpmysql"
+			"defaultValue": "sentiawpmysql"
         },
         "MysqlUsername": {
             "type": "string",
@@ -14,7 +14,7 @@
         },
         "MysqlServerName": {
             "type": "string",
-			"defaultValue": "dbserver"
+			"defaultValue": "sentiadbserver"
         },
         "AppName": {
             "type": "string",
