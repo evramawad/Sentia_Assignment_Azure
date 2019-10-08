@@ -78,7 +78,7 @@
         },
 	    "autoscaleEnabled": {
            "type": "Bool",
-	   "defaultValue": "True"    
+	   "defaultValue": "True",    
            "metadata": {
            "description": "A boolean to indicate whether the autoscale policy is enabled or disabled."
 		   }
