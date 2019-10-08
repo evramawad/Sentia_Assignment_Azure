@@ -4,4 +4,4 @@
 
 ## Description
 
-This template allows you to deploy an app service plan.
+This template allows you to deploy a scalable web app
