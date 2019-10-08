@@ -14,7 +14,7 @@
         },
         "MysqlServerName": {
            "type": "string",
-		   "defaultValue": "dbserver"
+		   "defaultValue": "sentiadbserver"
         },
         "AppName": {
            "type": "string",
